@@ -1,0 +1,11 @@
+#info {
+    display: flex;
+    justify-content: space-between;
+}
+.right {
+    font-style: italic;
+    text-align: right;
+}
+#class,#assignment {
+    font-weight: normal;
+}
