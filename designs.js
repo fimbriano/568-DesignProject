@@ -12,7 +12,6 @@ function lollipop(gameData) {
         .append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
-        
     //X Axis
     var xAxis = d3.scaleLinear()
         .domain([0,10])
@@ -78,8 +77,18 @@ function lollipop(gameData) {
         .style("fill", "#69b3a2")
         .attr("stroke", "black")
         .attr("class", "point");
+        
+    //Legend
+    svg.append("g")
+        .call(legend);
     
-
+    var legend = d3.legendColor()
+        .shapeWidth(30)
+        .orient("horizontal")
+        .scale(x);
+    x = d3.scaleSequential(d3.interpolateBlues)
+        .domain([0, 10]);
+    
 }
 
 function createVis(data) {
@@ -87,6 +96,13 @@ function createVis(data) {
     let gameData = data.slice(0,25);
     /*gameData.forEach(element => {
         console.log(element);
+    });*/
+    /*
+    var platforms = d3.nest()
+        .key(function (d) { return d.Platform;})
+        .entries(gameData);
+    platforms.forEach(d => {
+        console.log(JSON.stringify(d));
     });*/
 
     //Call function
