@@ -49,8 +49,8 @@ ID,Name,Platform,Platform_Group,Publisher,Genre,Year_of_Release,NA_players,EU_pl
 71,Call of Duty 4: Modern Warfare,X360,XBOX,Activision,Shooter,2007,5.93,2.36,0.13,0.9,0,9.31,94,70,8.4,1320,Infinity Ward,M
 74,Animal Crossing: New Leaf,3DS,Nintendo,Nintendo,Simulation,2012,2.03,2.36,4.39,0.39,0,9.16,88,70,8.7,626,Nintendo,E
 75,Mario Party DS,DS,Nintendo,Nintendo,Misc,2007,4.4,1.85,1.98,0.68,0,8.91,72,27,7.8,85,Hudson Soft,E
-76,The Elder Scrolls V: Skyrim,X360,,Bethesda Softworks,Role-Playing,2011,5.05,2.79,0.1,0.85,,8.79,96,89,8.4,3589,Bethesda Game Studios,M
-78,FIFA 16,PS4,,Electronic Arts,Sports,2015,1.12,6.12,0.06,1.28,,8.57,82,42,4.3,896,EA Sports,E
+76,The Elder Scrolls V: Skyrim,X360,XBOX,Bethesda Softworks,Role-Playing,2011,5.05,2.79,0.1,0.85,0,8.79,96,89,8.4,3589,Bethesda Game Studios,M
+78,FIFA 16,PS4,PS,Electronic Arts,Sports,2015,1.12,6.12,0.06,1.28,0,8.57,82,42,4.3,896,EA Sports,E
 79,Halo 2,XB,,Microsoft Game Studios,Shooter,2004,6.82,1.53,0.05,0.08,,8.49,95,91,8.2,1218,Bungie Software,M
 80,Wii Party,Wii,,Nintendo,Misc,2010,1.75,3.47,2.49,0.67,,8.38,68,42,7.4,54,Nd Cube,E
 81,Mario Party 8,Wii,,Nintendo,Misc,2007,3.74,2.24,1.58,0.7,,8.27,62,41,6.3,190,Hudson,E

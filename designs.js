@@ -4,6 +4,12 @@ function lollipop(gameData) {
         width = 1000 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
+    //Create Tooltip
+    var tooltip = d3.select("#chart")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
     //Create SVG
     var svg = d3.select("#chart")
         .append("svg")
@@ -90,14 +96,22 @@ function lollipop(gameData) {
             return colorScale(d.Platform_Group);
         })
         .attr("stroke", "black")
-        .attr("class", "point");
-        
-    //Create player markers
-    var numNodes = [];
-    gameData.forEach( item => {
-        numNodes.push(itemd.Num_Nodes);
-    });
-    var r = 2;
+        .attr("class", "point")
+        .on("mouseover", function(d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html("<strong>Global Players:</strong> " + d.Global_players + 
+                "<br/><strong>Critic Score:</strong> " + d.Critic_Score +
+                "<br/><strong>User SCore:</strong> " + d.User_Score)
+                .style("left", (d3.event.pageX) + "px")
+                .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 }
 
 function chart(gameData) {
