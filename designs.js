@@ -12,6 +12,13 @@ function lollipop(gameData) {
         .append("g")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.top + ")");
+    
+    //Color Scale
+    var labels = ["PS", "XBOX", "PC", "Nintento", "Other"]
+    var colorScale = d3.scaleOrdinal()
+        .domain(labels)
+        .range(d3.schemeAccent)
+
     //X Axis
     var xAxis = d3.scaleLinear()
         .domain([0,10])
@@ -47,7 +54,10 @@ function lollipop(gameData) {
         .attr("y", d => yAxis(d.Critic_Score))
         .attr("width", .5)
         .attr("height", d => height - yAxis(d.Critic_Score))
-        .attr("fill", "lightgrey")
+        .attr("fill", function(d) {
+            console.log(colorScale(d.Platform_Group));
+            return colorScale(d.Platform_Group);
+        })
         .attr("stroke", "black")
         .attr("class", "dropline");
 
@@ -66,7 +76,7 @@ function lollipop(gameData) {
         .attr("stroke-width", "2.5%")
         .attr("class", "pacman");
 
-    //Create circle points
+    //Create point markers
     var circles = svg.selectAll("point")
         .data(gameData)
         .enter()
@@ -74,16 +84,36 @@ function lollipop(gameData) {
         .attr("cx", function(d) { return xAxis(d.User_Score); })
         .attr("cy", function(d) { return yAxis(d.Critic_Score); })
         .attr("r", "4")
-        .style("fill", "#69b3a2")
+        //.style("fill", "#69b3a2")
+        .attr("fill", function(d) {
+            console.log(colorScale(d.Platform_Group));
+            return colorScale(d.Platform_Group);
+        })
         .attr("stroke", "black")
         .attr("class", "point");
         
-    //Legend
-    var labels = ["PS", "XBOX", "PC", "Nintento", "Other"]
-    var colorScale = d3.scaleOrdinal()
-        .domain(labels)
-        .range(d3.schemeAccent)
-    
+    //Create player markers
+    var numNodes = [];
+    gameData.forEach( item => {
+        numNodes.push(itemd.Num_Nodes);
+    });
+    var r = 2;
+}
+
+function chart(gameData) {
+    //Set margins
+    var margin = {top: 10, right: 30, bottom: 90, left: 40};
+        width = 1000 - margin.left - margin.right,
+        height = 1000 - margin.top - margin.bottom;
+
+    //Create SVG
+    var svg = d3.select("#chart")
+        .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
     
 }
 
@@ -103,6 +133,8 @@ function createVis(data) {
 
     //Call function
     lollipop(gameData);
+
+    chart(gameData);
 }
 
 d3.csv("video_game.csv")
