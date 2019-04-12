@@ -79,15 +79,11 @@ function lollipop(gameData) {
         .attr("class", "point");
         
     //Legend
-    svg.append("g")
-        .call(legend);
+    var labels = ["PS", "XBOX", "PC", "Nintento", "Other"]
+    var colorScale = d3.scaleOrdinal()
+        .domain(labels)
+        .range(d3.schemeAccent)
     
-    var legend = d3.legendColor()
-        .shapeWidth(30)
-        .orient("horizontal")
-        .scale(x);
-    x = d3.scaleSequential(d3.interpolateBlues)
-        .domain([0, 10]);
     
 }
 
