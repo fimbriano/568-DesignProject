@@ -1,8 +1,10 @@
-function lollipop(gameData) {
+function lollipop(data, platformMap) {
     //Set margins
     var margin = {top: 10, right: 30, bottom: 90, left: 40};
         width = 1000 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
+
+    var dropdownItems = ["All","PS", "XBOX", "PC", "Nintento", "Other"];
 
     //Create Tooltip
     var tooltip = d3.select("#chart")
@@ -55,73 +57,119 @@ function lollipop(gameData) {
         .style("text-anchor", "middle")
         .text("Critic Score");
 
-    //Create drop lines
-    var droplines = svg.append("g")
-        .attr("class", "droplines");
-    var rect = droplines.selectAll("dropline")
-        .data(gameData)
-        .enter()
-        .append("rect")
-            .attr("x", d => xAxis(d.User_Score))
-            .attr("y", d => yAxis(d.Critic_Score))
-            .attr("width", .5)
-            .attr("height", d => height - yAxis(d.Critic_Score))
-            .attr("fill", function(d) {
-                return colorScale(d.Platform_Group);
-            })
-            .attr("stroke", "black")
-            .attr("class", "dropline");
+    var drawViz = function(gameData) {
+        //Create drop lines
+        var droplines = svg.append("g")
+            .attr("class", "droplines");
+        var rect = droplines.selectAll("dropline")
+            .data(gameData)
+            .enter()
+            .append("rect")
+                .attr("x", d => xAxis(d.User_Score))
+                .attr("y", d => yAxis(d.Critic_Score))
+                .attr("width", .5)
+                .attr("height", d => height - yAxis(d.Critic_Score))
+                .attr("fill", function(d) {
+                    return colorScale(d.Platform_Group);
+                })
+                .attr("stroke", "black")
+                .attr("class", "dropline");
+        //Update old lines
+        rect.transition()
+            .duration(250)
+            .attr("y", d=> yAxis(d.Critic_Score))
+            .attr("height", d => height - yAxis(d.Critic_Score));
+        //Remove old lines
+        rect.exit().remove();
 
-    //Create pacman
-    var pacmanMark = svg.append("g")
-        .attr("class", "pacman");
-    var pacman = pacmanMark.selectAll("pacman")
-        .data(gameData)
-        .enter()
-        .append("circle")
-            .attr("cx", function(d) { return xAxis(d.User_Score); })
-            .attr("cy", function(d) { return yAxis(d.Critic_Score); })
-            .attr("r", "1.5%")
-            .style("fill", "none")
-            .attr("stroke", "gold")
-            .attr("stroke-dasharray", "63, 17")
-            .attr("stroke-dashoffset", -5)
-            .attr("stroke-width", "2.5%")
+        //Create pacman
+        var pacmanMark = svg.append("g")
             .attr("class", "pacman");
+        var pacman = pacmanMark.selectAll("pacman")
+            .data(gameData)
+            .enter()
+            .append("circle")
+                .attr("cx", function(d) { return xAxis(d.User_Score); })
+                .attr("cy", function(d) { return yAxis(d.Critic_Score); })
+                .attr("r", "1.5%")
+                .style("fill", "none")
+                .attr("stroke", "gold")
+                .attr("stroke-dasharray", "63, 17")
+                .attr("stroke-dashoffset", -5)
+                .attr("stroke-width", "2.5%")
+                .attr("class", "pacman");
+        //Update old pacman
+        pacman.transition()
+            .duration(250)
+            .attr("cy", d => yAxis(d.Critic_Score));
+        //Remove old pacman
+        pacman.exit().remove();
 
-    //Create point markers
-    var points = svg.append("g")
-        .attr("class", "points");
-    var circles = points.selectAll("point")
-        .data(gameData)
-        .enter()
-        .append("circle")
-            .attr("cx", function(d) { return xAxis(d.User_Score); })
-            .attr("cy", function(d) { return yAxis(d.Critic_Score); })
-            .attr("r", "4")
-            //.style("fill", "#69b3a2")
+        //Create point markers
+        var points = svg.append("g")
+            .attr("class", "points");
+        var circles = points.selectAll("point")
+            .data(gameData)
+            .enter()
+            .append("circle")
+                .attr("cx", function(d) { return xAxis(d.User_Score); })
+                .attr("cy", function(d) { return yAxis(d.Critic_Score); })
+                .attr("r", "4")
+                .attr("fill", function(d) {
+                    return colorScale(d.Platform_Group);
+                })
+                .attr("stroke", "black")
+                .attr("class", "point")
+                .on("mouseover", function(d) {
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html("<strong>Global Players:</strong> " + d.Global_players + 
+                        "<br/><strong>Critic Score:</strong> " + d.Critic_Score +
+                        "<br/><strong>User Score:</strong> " + d.User_Score +
+                        "<br/><strong>Platform</strong> " + d.Platform_Group)
+                        .style("left", (d3.event.pageX) + "px")
+                        .style("top", (d3.event.pageY - 28) + "px");
+                })
+                .on("mouseout", function(d) {
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+        //Update old lines
+        circles.transition()
+            .duration(250)
+            .attr("cy", d => yAxis(d.Critic_Score))
             .attr("fill", function(d) {
                 return colorScale(d.Platform_Group);
-            })
-            .attr("stroke", "black")
-            .attr("class", "point")
-            .on("mouseover", function(d) {
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                tooltip.html("<strong>Global Players:</strong> " + d.Global_players + 
-                    "<br/><strong>Critic Score:</strong> " + d.Critic_Score +
-                    "<br/><strong>User SCore:</strong> " + d.User_Score +
-                    "<br/><strong>Platform</strong> " + d.Platform_Group)
-                    .style("left", (d3.event.pageX) + "px")
-                    .style("top", (d3.event.pageY - 28) + "px");
-            })
-            .on("mouseout", function(d) {
-                tooltip.transition()
-                    .duration(500)
-                    .style("opacity", 0);
             });
+        //Remove old lines
+        circles.exit().remove();
+    }
+    //Dropdown
+    var dropdownChange = function() {
+        var newPlatform = d3.select(this).property("value"), newData;
+        
+        if(newPlatform === "All"){
+            newData = data;
+        } else
+            newData = platformMap[newPlatform];
 
+        drawViz(newData);
+    }
+    var dropdown = d3.select("#chart")
+        .insert("select", "svg")
+        .on("change", dropdownChange);
+    dropdown.selectAll("option")
+        .data(dropdownItems)
+        .enter().append("option")
+            .attr("value", d => d)
+            .text(d => d);
+    
+    //Draw initial graph
+    var initialData = data;
+    drawViz(initialData);
+    
     //Legend
     var legendDiv = d3.select("#chart")
         .append("div")
@@ -153,7 +201,8 @@ function lollipop(gameData) {
                 .style("opacity", .9);
             tooltip.html("<strong>Global Players:</strong> " + 
                 "<br/><strong>Critic Score:</strong> " +
-                "<br/><strong>User Score:</strong> ")
+                "<br/><strong>User Score:</strong> " +
+                "<br/><strong>Platform</strong>")
                 .style("left", (d3.event.pageX) + "px")
                 .style("top", (d3.event.pageY - 28) + "px");
         })
@@ -162,7 +211,6 @@ function lollipop(gameData) {
                 .duration(500)
                 .style("opacity", 0);
         });
-
     var line = legendSVG.append("line")
         .attr("x1", 100)
         .attr("y1", 50)
@@ -170,7 +218,6 @@ function lollipop(gameData) {
         .attr("y2", 150)
         .attr("stroke", "black")
         .attr("stroke-width", 2);
-
     var circleX = 25;
     circleY = 25;
     var scaleSVG = svg2.append("g")
@@ -196,7 +243,6 @@ function lollipop(gameData) {
             .attr("cy", circleY)
             .attr("r", 20)
             .attr("fill", d => {
-                console.log(colorScale(d));
                 return colorScale(d);
             });
     var legendLabels = legendContents.append("text")
@@ -205,41 +251,28 @@ function lollipop(gameData) {
             .text(d => d);
 }
 
-function chart(gameData) {
-    //Set margins
-    var margin = {top: 10, right: 30, bottom: 90, left: 40};
-        width = 1000 - margin.left - margin.right,
-        height = 1000 - margin.top - margin.bottom;
-
-    //Create SVG
-    var svg = d3.select("#chart")
-        .append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-            .attr("transform",
-                "translate(" + margin.left + "," + margin.top + ")");
-    
-}
-
 function createVis(data) {
+    var fields = ["User_Score", "Critic_Score", "Global_players"];
+
     //Get top 25 rows
     let gameData = data.slice(0,25);
-    /*gameData.forEach(element => {
-        console.log(element);
-    });*/
-    /*
-    var platforms = d3.nest()
-        .key(function (d) { return d.Platform;})
-        .entries(gameData);
-    platforms.forEach(d => {
-        console.log(JSON.stringify(d));
-    });*/
 
+    //Group by platform
+    var platformMap = {};
+    data.forEach(d => {
+        var platform = d.Platform_Group;
+        platformMap[platform] = [];
+        //{platform: attrVal1, attrVal2 ... etc.}
+        fields.forEach( field => {
+            platformMap[platform].push(+d[field]);
+        });
+    });
+
+    console.log(JSON.stringify(platformMap));
+    
     //Call function
-    lollipop(gameData);
+    lollipop(gameData, platformMap);
 
-    //chart(gameData);
 }
 
 d3.csv("video_game.csv")
