@@ -41,6 +41,14 @@
     pointer-events: none;         
 }
 
+#dropdown {
+    height: 25px;
+}
+#chart {
+    display: flex;
+    justify-content: space-between;
+}
+
 img {
     max-width: 50%;
     height: auto;
