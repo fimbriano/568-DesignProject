@@ -57,7 +57,7 @@ function boxplot(data) {
         .text("Critic Score");
 }
 
-function lollipop(data, platformMap) {
+function lollipop(data) {
     //Set margins
     var margin = {top: 10, right: 30, bottom: 90, left: 40};
         width = 1000 - margin.left - margin.right,
@@ -356,7 +356,7 @@ function createVis(data) {
         .entries(gameData);
 
     //Call function
-    lollipop(gameData, platformMap);
+    lollipop(gameData);
     boxplot(platformData);
 }
 
