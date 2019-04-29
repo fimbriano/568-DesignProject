@@ -57,13 +57,13 @@ function boxplot(data) {
         .text("Critic Score");
 }
 
-function lollipop(data) {
+function lollipop(gameData) {
     //Set margins
-    var margin = {top: 10, right: 30, bottom: 90, left: 40};
-        width = 1000 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+    var margin = {top: 10, right: 20, bottom: 90, left: 50};
+        width = 700 - margin.left - margin.right,
+        height = 450 - margin.top - margin.bottom;
 
-    var dropdownItems = ["All","PS", "XBOX", "PC", "Nintento", "Other"];
+    var dropdownItems = ["All","PS", "XBOX", "PC", "Nintendo", "Other"];
 
     //Create Tooltip
     var tooltip = d3.select("#chart")
@@ -71,8 +71,12 @@ function lollipop(data) {
             .attr("class", "tooltip")
             .style("opacity", 0);
     
+    var lollipopViz = d3.select("#chart")
+        .append("div")
+        .attr("id", "lollipopViz");
+
     //Create SVG
-    var svg = d3.select("#chart")
+    var svg = d3.select("#lollipopViz")
         .append("svg")
             .attr("class", "lollipopSVG")
             .attr("width", width + margin.left + margin.right)
@@ -81,52 +85,18 @@ function lollipop(data) {
             .attr("class", "graph")
             .attr("transform",
                 "translate(" + margin.left + "," + margin.right + ")");
-    
-    //Dropdown
-    var dropdownChange = function() {
-        var newPlatform = d3.select(this).property("value"), newData;
-        if(newPlatform === "All"){
-            newData = data;
-        } else
-            newData = platformMap[newPlatform];
-
-        //drawViz(newData);
-    }
-    var dropdown = d3.select("#chart")
-        .insert("select", "svg")
-        .attr("id", "dropdown")
-        .on("change", dropdownChange)
-        .on("mouseover", function(d) {
-            tooltip.transition()
-                .duration(200)
-                .style("opacity", .9);
-            tooltip.html("<strong>Currently not working</strong>")
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
-        })
-        .on("mouseout", function(d) {
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        })
-    dropdown.selectAll("option")
-        .data(dropdownItems)
-        .enter().append("option")
-            .attr("value", d => d)
-            .text(d => d);
+            
     //Color Scale
-    var labels = ["PS", "XBOX", "PC", "Nintento", "Other"];
+    var labels = ["PS", "XBOX", "PC", "Nintendo", "Other"];
     var colorScale = d3.scaleOrdinal()
         .domain(labels)
-        .range(d3.schemeAccent);
+        .range(d3.schemeCategory10);
     
     //Title
     var title = svg.append("text")
-        .attr("x", 300)
-        .attr("y", 2)
+        .attr("x", 270)
+        .attr("y", -5)
         .text("Top 25 Games - Avg. Players per Platform")
-
-    var labels = ["PS", "XBOX", "PC", "Nintento", "Other"];
 
     //X Axis
     var xAxis = d3.scaleLinear()
@@ -156,176 +126,141 @@ function lollipop(data) {
         .style("text-anchor", "middle")
         .text("Critic Score");
 
-    //Draw initial graph
-    var drawViz = function(gameData) {
-        //Create drop lines
-        var droplines = svg.append("g")
-            .attr("class", "droplines");
-        var rect = droplines.selectAll("dropline")
-            .data(gameData)
-            .enter()
-            .append("rect")
-                .attr("x", d => xAxis(d.User_Score))
-                .attr("y", d => yAxis(d.Critic_Score))
-                .attr("width", .5)
-                .attr("height", d => height - yAxis(d.Critic_Score))
-                .attr("fill", function(d) {
-                    return colorScale(d.Platform_Group);
-                })
-                .attr("stroke", "black")
-                .attr("class", "dropline");
+    //Draw graph
+    //Create drop lines
+    var droplines = svg.append("g")
+        .attr("class", "droplines");
+    var rect = droplines.selectAll("dropline")
+        .data(gameData)
+        .enter()
+        .append("rect")
+            .attr("x", d => xAxis(d.User_Score))
+            .attr("y", d => yAxis(d.Critic_Score))
+            .attr("width", .5)
+            .attr("height", d => height - yAxis(d.Critic_Score))
+            .attr("fill", function(d) {
+                return colorScale(d.Platform_Group);
+            })
+            .attr("stroke", "black")
+            .attr("class", "dropline");
 
-        //Create pacman
-        var pacmanMark = svg.append("g")
-            .attr("class", "pacman");
-        var pacman = pacmanMark.selectAll("pacman")
-            .data(gameData)
-            .enter()
-            .append("circle")
-                .attr("cx", function(d) { return xAxis(d.User_Score); })
-                .attr("cy", function(d) { return yAxis(d.Critic_Score); })
-                .attr("r", "1.5%")
-                .style("fill", "none")
-                .attr("stroke", "gold")
-                .attr("stroke-dasharray", "63, 17")
-                .attr("stroke-dashoffset", -5)
-                .attr("stroke-width", "2.5%")
-                .attr("class", "pacman");
+    //Create pacman
+    var pacmen = svg.append("g")
+        .attr("class", "pacmen");
 
-        //Create point markers
-        var points = svg.append("g")
-            .attr("class", "points");
-        var circles = points.selectAll("point")
-            .data(gameData)
-            .enter()
-            .append("circle")
-                .attr("cx", function(d) { return xAxis(d.User_Score); })
-                .attr("cy", function(d) { return yAxis(d.Critic_Score); })
-                .attr("r", "4")
-                .attr("fill", function(d) {
-                    return colorScale(d.Platform_Group);
-                })
-                .attr("stroke", "black")
-                .attr("class", "point")
-                .on("mouseover", function(d) {
-                    tooltip.transition()
-                        .duration(200)
-                        .style("opacity", .9);
-                    tooltip.html("<strong>Global Players:</strong> " + d.Global_players + 
-                        "<br/><strong>Critic Score:</strong> " + d.Critic_Score +
-                        "<br/><strong>User Score:</strong> " + d.User_Score +
-                        "<br/><strong>Platform</strong> " + d.Platform_Group)
-                        .style("left", (d3.event.pageX) + "px")
-                        .style("top", (d3.event.pageY - 28) + "px");
-                })
-                .on("mouseout", function(d) {
-                    tooltip.transition()
-                        .duration(500)
-                        .style("opacity", 0);
-                });
-
-        //Draw playerMarks
-        //TODO: only draws one circle..
-        gameData.forEach(d => {
-            var x = xAxis(d.User_Score);
-            var y = yAxis(d.Critic_Score);
-            var nodes = d3.range(d.Num_Nodes);
-            console.log(nodes)
-            var node = svg.append("g")
-                .attr("class", "nodes");
-            var nodeMarker = node.selectAll("node")
-                .data(nodes)
-                .enter()
-                .append("circle")
-                .attr("cx", x+10)
-                .attr("cy", y)
-                .attr("r", 4)
-                .attr("fill", "black");
-        })
+    function drawArc(group){
+        var pacmanData = [
+            {group: 1, start: 1.6, size: 6},
+            {group: 2, start: 1.85, size:5.56},
+            {group: 3, start: 2.1, size: 5},
+            {group: 4, start: 2.35, size: 4.5},
+            {group: 5, start: 2.6, size: 4}
+        ];
+        var d = group-1;
+        var arc = d3.arc()
+            .innerRadius(0)
+            .outerRadius(15)
+                .startAngle(pacmanData[d].start)
+                .endAngle((pacmanData[d].start + pacmanData[d].size));
+         return arc();
     }
+    var pacmanMark = pacmen.selectAll("g")
+        .data(gameData)
+        .enter()
+        .append("g")
+            .attr("class", "pacman")
+            .attr("transform", d => "translate("+ xAxis(d.User_Score) + " , "+ yAxis(d.Critic_Score) +")");
+    pacmanMark.append("path")        
+        .style("fill", function(d) {
+            return colorScale(d.Platform_Group);
+        })
+        .style("stroke", "black")
+        .attr("d", function(d) {
+            return drawArc(d.Player_Group);
+        });
 
-    //Draw data
-    //TODO: add ability to update graph
-    drawViz(data);
+    //Dropdown
+    var dropdownChange = function() {
+        //Get selected platform
+        var newPlatform = d3.select(this).property("value");
+
+        if(newPlatform === "All"){
+            //Show droplines
+            d3.selectAll(".lollipopSVG .droplines .dropline")
+                .attr("class", "dropline show");
+            //Show droplines
+            d3.selectAll(".lollipopSVG .pacmen .pacman")
+                .attr("class", "pacman show");
+        } else {    
+            //Hide droplines
+            d3.selectAll(".lollipopSVG .droplines .dropline")
+                .attr("class", function(d){
+                    if(d.Platform_Group === newPlatform){
+                        return "dropline show";
+                    } else
+                        return "dropline hidden";
+                });
+            //Hide pacmen
+            d3.selectAll(".lollipopSVG .pacmen .pacman")
+                .attr("class", function(d){
+                    if(d.Platform_Group === newPlatform){
+                        return "pacman show";
+                    } else
+                        return "pacman hidden";
+                });
+        }
+    }
+    var dropdown = d3.select("#chart")
+        .insert("select", "#lollipopViz")
+        .attr("id", "dropdown")
+        .on("change", dropdownChange)
+    dropdown.selectAll("option")
+        .data(dropdownItems)
+        .enter().append("option")
+            .attr("value", d => d)
+            .text(d => d);
 
     //Legend
-    var legendDiv = d3.select("#chart")
+    var legendDiv = d3.select("#lollipopViz")
         .append("div")
             .attr("id", "legend")
-            .html("<h3>Legend</h3><br/>");
-    var svg2 = legendDiv.append("svg")
+            .html("<strong>Legend<strong/><br/>");
+    var legendSVG = legendDiv.append("svg")
             .attr("width", 250)
-            .attr("height", 500);
-    var legendSVG = svg2.append("svg")
-            .attr("viewbox", "0 0 100 100")
-            .attr("class", "legend");
-    var legendPacman = legendSVG.append("circle")
-        .attr("cx", "20%")
-        .attr("cy", "10%")
-        .attr("r", "5%")
-        .attr("fill", "none")
-        .attr("stroke", "gold")
-        .attr("stroke-dasharray", "105, 50")
-        .attr("stroke-dashoffset", -10)
-        .attr("stroke-width", "10%");
-    var mainCircle = svg2.append("circle")
-        .attr("cx", 50)
-        .attr("cy", 50)
-        .attr("r", 10)
-        .attr("fill", "white")
-        .attr("stroke", "black")
-        .on("mouseover", function(d) {
-            tooltip.transition()
-                .duration(200)
-                .style("opacity", .9);
-            tooltip.html("<strong>Global Players:</strong> " + 
-                "<br/><strong>Critic Score:</strong> " +
-                "<br/><strong>User Score:</strong> " +
-                "<br/><strong>Platform</strong>")
-                .style("left", (d3.event.pageX) + "px")
-                .style("top", (d3.event.pageY - 28) + "px");
-        })
-        .on("mouseout", function(d) {
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        });
-    var playerCircle = svg2.append("circle")
-        .attr("cx", 75)
-        .attr("cy", 50)
-        .attr("r", 6)
-        .attr("fill", "black")
-    var line2 = legendSVG.append("line")
-        .attr("x1", 75)
-        .attr("y1", 50)
-        .attr("x2", 90)
-        .attr("y2", 10)
-        .attr("stroke", "black")
-        .attr("stroke-width", 2);
-    var text = legendSVG.append("text")
-        .attr("x", 95)
-        .attr("y", 12)
-        .text("# Global Players");
+            .attr("height", 400)
+            .attr("id", "legendSVG");
+    var arc = d3.arc()
+        .innerRadius(0)
+        .outerRadius(25)
+            .startAngle(2.1)
+            .endAngle((2.1+5));
+    var legendPacman = legendSVG.append("g")
+        .attr("class", "legendPacman")
+        .attr("transform", "translate(50, 50)");
+    legendPacman.append("path")
+        .style("fill", "gold")
+        .style("stroke", "black")
+        .attr("d", arc);
     var line = legendSVG.append("line")
         .attr("x1", 50)
-        .attr("y1", 50)
-        .attr("x2", 70)
-        .attr("y2", 150)
+        .attr("y1", 65)
+        .attr("x2", 65)
+        .attr("y2", 120)
         .attr("stroke", "black")
         .attr("stroke-width", 2);
     var circleX = 25;
     circleY = 25;
-    var scaleSVG = svg2.append("g")
+    var scaleSVG = legendSVG.append("g")
             .attr("class", "legend-scale");
     var scale = scaleSVG.append("rect")
             .attr("x", margin.left-5)
-            .attr("y", 150)
-            .attr("width", 150)
-            .attr("height", 255)
+            .attr("y", 110)
+            .attr("width", 145)
+            .attr("height", 250)
             .attr("stroke", "black")
             .attr("fill", "white");
     var legendGroups = scaleSVG.append("g")
-        .attr("transform", "translate(25, 155)");
+        .attr("transform", "translate(25, 110)");
     var legendContents = legendGroups.selectAll("g")
         .data(labels)
         .enter()
@@ -336,7 +271,7 @@ function lollipop(data) {
     var legendMarks = legendContents.append("circle")
             .attr("cx", circleX)
             .attr("cy", circleY)
-            .attr("r", 20)
+            .attr("r", 15)
             .attr("fill", d => {
                 return colorScale(d);
             });

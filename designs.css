@@ -44,12 +44,19 @@
 #dropdown {
     height: 25px;
 }
-#chart {
+#lollipopViz {
     display: flex;
-    justify-content: space-between;
+    flex-direction: row;
 }
 
 img {
     max-width: 50%;
     height: auto;
+}
+
+.hidden {
+    opacity: 0;
+}
+.show {
+    opacity: 1;
 }
