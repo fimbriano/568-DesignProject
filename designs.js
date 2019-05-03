@@ -1,6 +1,12 @@
-function boxplot(data) {
+function stackedBars(platformData, genreData, gameData) {
+    //Get values
+
+    var values = [], platformValues = []
+    genreData.forEach(d => {values.push(d.value)});
+    console.log(values);
+
     //Set margins
-    var margin = {top: 10, right: 30, bottom: 90, left: 40};
+    var margin = {top: 25, right: 30, bottom: 55, left: 55};
         width = 600 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
@@ -13,7 +19,101 @@ function boxplot(data) {
     //Create SVG
     var svg = d3.select("#chart")
         .append("svg")
-            .attr("class", "boxplotSVG")
+            .attr("class", "barSVG")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+            .attr("class", "graph")
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+    
+    //Title
+    var title = svg.append("text")
+        .attr("x", (width)/3 - margin.top)
+        .attr("y", -5)
+        .text("Top 25 Games - # Global Players per Genre");
+
+    var labels = ["PS", "XBOX", "PC", "Nintendo", "Other"];
+    var genres = ["Action", "Fighting", "Misc", "Platform", "Puzzle", "Racing", "Shooter", "Sports"]
+
+    //Color Scale
+    var labels = ["PS", "XBOX", "PC", "Nintendo", "Other"];
+    var colorScale = d3.scaleOrdinal()
+        .domain(labels)
+        .range(d3.schemeCategory10);
+
+    //X Axis
+    var xAxis = d3.scaleBand()
+        .domain(genres)
+        .range([0, width])
+        .paddingInner(0.05);
+    var x = svg.append("g")
+        .attr("class", "x-axis")
+        .attr("transform", "translate(0,"+ height +")")
+        .call(d3.axisBottom(xAxis));
+    svg.append("text")
+        .attr("transform","translate(" + (width/2) + " ," + (height + margin.top + 25) + ")")
+        .style("text-anchor", "middle")
+        .text("Genre");
+
+    //Y Axis
+    var yAxis = d3.scaleLinear()
+        .domain([0,160])
+        .range([height, margin.top]);
+    var y = svg.append("g")
+        .attr("class", "y-axis")
+        .call(d3.axisLeft(yAxis));
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left -5)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("# Global Players");
+
+    var groups = svg.selectAll("genre")
+        .data(platformData)
+        .enter().append("g")
+        .attr("class", d=> {return d.key;});
+    
+    var rect = groups
+    .selectAll("rect")
+        .data(function(d) {
+            return d.values;
+        }).enter()
+        .append("rect")
+        .attr("x", function(d) { return xAxis(d3.select(this.parentNode).attr("class"))})
+        .attr("y", function(v, i) { 
+            var h = yAxis(v.value);
+            return (height - h); 
+            //return yAxis(values[i])
+        })    
+        .attr("width", xAxis.bandwidth())
+        .attr("height", function(d, i) { 
+            console.log("~");console.log(d.value); return yAxis(d.value); 
+        })
+        .attr("fill", d => colorScale(d.key))
+        .attr("class", d => { return d.key});
+    }
+
+function lineChart(gameData) {
+    
+
+    //Set margins
+    var margin = {top: 25, right: 30, bottom: 55, left: 55};
+        width = 600 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+
+    //Create Tooltip
+    var tooltip = d3.select("#chart")
+        .append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
+    //Create SVG
+    var svg = d3.select("#chart")
+        .append("svg")
+            .attr("class", "lineSVG")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -24,13 +124,18 @@ function boxplot(data) {
     //Title
     var title = svg.append("text")
         .attr("x", 200)
-        .attr("y", 3)
-        .text("Top 25 Games - Avg. Players per Platform");
+        .attr("y", -5)
+        .text("Top 25 Games - Global Players vs. NA Players");
 
-    var labels = ["PS", "XBOX", "PC", "Nintento", "Other"];
+    //Color Scale
+    var labels = ["PS", "XBOX", "PC", "Nintendo", "Other"];
+    var colorScale = d3.scaleOrdinal()
+        .domain(labels)
+        .range(d3.schemeCategory10);
 
     //X Axis
-    var xAxis = d3.scaleOrdinal()
+    var xAxis = d3.scaleLinear()
+        .domain([0,45])
         .range([0, width]);
     var x = svg.append("g")
         .attr("class", "x-axis")
@@ -39,12 +144,12 @@ function boxplot(data) {
     svg.append("text")
         .attr("transform","translate(" + (width/2) + " ," + (height + margin.top + 25) + ")")
         .style("text-anchor", "middle")
-        .text("Platform");
+        .text("# NA Players");
     
     //Y Axis
     var yAxis = d3.scaleLinear()
         .domain([0,100])
-        .range([height, 0]);
+        .range([height, margin.top]);
     var y = svg.append("g")
         .attr("class", "y-axis")
         .call(d3.axisLeft(yAxis));
@@ -54,7 +159,34 @@ function boxplot(data) {
         .attr("x",0 - (height / 2))
         .attr("dy", "1em")
         .style("text-anchor", "middle")
-        .text("Critic Score");
+        .text("# Global Players");
+    
+    //Plot points
+    var points = svg.append("g")
+        .attr("class", "points");
+    var point = points.selectAll("point")
+        .data(gameData)
+        .enter().append("circle")
+        .attr("class", "point")
+        .attr("r", 4)
+        .attr("cx", d => xAxis(d.NA_players))
+        .attr("cy", d => yAxis(d.Global_players))
+        .style("fill", d => colorScale(d.Platform_Group))
+        .on("mouseover", function(d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 0.9);
+            tooltip.html("<strong>Game</strong>: " + d.Name +
+                            "<br/><strong>Global Players</strong>: " + d.Global_players +
+                            "<br/><strong>NA Players</strong>: " + d.NA_players)  
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 }
 
 function lollipop(gameData) {
@@ -177,6 +309,22 @@ function lollipop(gameData) {
         .style("stroke", "black")
         .attr("d", function(d) {
             return drawArc(d.Player_Group);
+        })
+        .on("mouseover", function(d) {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", 0.9);
+            tooltip.html("<strong>Game</strong>: " + d.Name +
+                            "<br/><strong>Global Players</strong>: " + d.Global_players +
+                            "<br/><strong>Critic Score</strong>: " + d.Critic_Score +
+                            "<br/><strong>User Score</strong>: " + d.User_Score)
+                    .style("left", (d3.event.pageX) + "px")
+                    .style("top", (d3.event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(d) {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
         });
 
     //Dropdown
@@ -188,9 +336,12 @@ function lollipop(gameData) {
             //Show droplines
             d3.selectAll(".lollipopSVG .droplines .dropline")
                 .attr("class", "dropline show");
-            //Show droplines
+            //Show pacmen
             d3.selectAll(".lollipopSVG .pacmen .pacman")
                 .attr("class", "pacman show");
+            //Show points
+            d3.selectAll(".lineSVG .points .point")
+                .attr("class", "point show");
         } else {    
             //Hide droplines
             d3.selectAll(".lollipopSVG .droplines .dropline")
@@ -207,6 +358,15 @@ function lollipop(gameData) {
                         return "pacman show";
                     } else
                         return "pacman hidden";
+                });
+
+            //Hide points
+            d3.selectAll(".lineSVG .points .point")
+                .attr("class", function(d){
+                    if(d.Platform_Group === newPlatform){
+                        return "point show";
+                    } else
+                        return "point hidden";
                 });
         }
     }
@@ -285,14 +445,28 @@ function createVis(data) {
     //Get top 25 rows
     let gameData = data.slice(0,25);
 
-    //Boxplot data        
-    var platformData = d3.nest()
-        .key(d => { return d.Platform_Group;})
+    //Change to number format
+    gameData.forEach(function(d) {
+        d.Global_players = +d.Global_players;
+        d.NA_players = +d.NA_players;
+    });
+
+    var genreData = d3.nest()
+        .key(d => { return d.Genre; })
+        .rollup(function(v) { return d3.sum(v, function(d) { return d.Global_players; })})        
         .entries(gameData);
+    console.log(genreData);
+    var genrePlatformData = d3.nest()
+        .key(d => { return d.Genre; })
+        .key(d => { return d.Platform_Group; })
+        .rollup(function(v) { return d3.sum(v, function(d) { return d.Global_players; })})        
+        .entries(gameData);
+    console.log(genrePlatformData);
 
     //Call function
     lollipop(gameData);
-    boxplot(platformData);
+    lineChart(gameData);
+    stackedBars(genrePlatformData, genreData, gameData);
 }
 
 d3.csv("video_game.csv")
