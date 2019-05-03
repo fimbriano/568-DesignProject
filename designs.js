@@ -1,10 +1,4 @@
-function stackedBars(platformData, genreData, gameData) {
-    //Get values
-
-    var values = [], platformValues = []
-    genreData.forEach(d => {values.push(d.value)});
-    console.log(values);
-
+function stackedBars(genreData) {
     //Set margins
     var margin = {top: 25, right: 30, bottom: 55, left: 55};
         width = 600 - margin.left - margin.right,
@@ -71,32 +65,28 @@ function stackedBars(platformData, genreData, gameData) {
         .style("text-anchor", "middle")
         .text("# Global Players");
 
-    var groups = svg.selectAll("genre")
-        .data(platformData)
-        .enter().append("g")
-        .attr("class", d=> {return d.key;});
-    
-    var rect = groups
-    .selectAll("rect")
-        .data(function(d) {
-            return d.values;
-        }).enter()
-        .append("rect")
-        .attr("x", function(d) { return xAxis(d3.select(this.parentNode).attr("class"))})
-        .attr("y", function(v, i) { 
-            var h = yAxis(v.value);
-            return (height - h); 
-            //return yAxis(values[i])
-        })    
-        .attr("width", xAxis.bandwidth())
-        .attr("height", function(d, i) { 
-            console.log("~");console.log(d.value); return yAxis(d.value); 
-        })
-        .attr("fill", d => colorScale(d.key))
-        .attr("class", d => { return d.key});
+    //Get stacks
+    var stacks = d3.stack()
+        .keys(genreData.columns.slice(1,6))(genreData);
+    console.log(stacks);
+
+    //Create groups and rectangles
+    svg.append("g")
+        .selectAll("g")
+        .data(stacks)
+        .join("g")
+            .attr("fill", d => colorScale(d.key))
+        .selectAll("rect")
+        .data(d => d)
+        .join("rect")
+            .attr("x", (d,i) => xAxis(d.data.Genre))
+            .attr("y", d => yAxis(d[1]))
+            .attr("height", d => yAxis(d[0])-yAxis(d[1]))
+            .attr("width", xAxis.bandwidth())
+            .append("title").text(d => d[1]-d[0]);            
     }
 
-function lineChart(gameData) {
+function scatterPlot(gameData) {
     
 
     //Set margins
@@ -113,7 +103,7 @@ function lineChart(gameData) {
     //Create SVG
     var svg = d3.select("#chart")
         .append("svg")
-            .attr("class", "lineSVG")
+            .attr("class", "scatterSVG")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
         .append("g")
@@ -442,8 +432,11 @@ function lollipop(gameData) {
 }
 
 function createVis(data) {
+    var videogameData = data[0];
+    var genreData = data[1];
+
     //Get top 25 rows
-    let gameData = data.slice(0,25);
+    var gameData = videogameData.slice(0,25);
 
     //Change to number format
     gameData.forEach(function(d) {
@@ -451,23 +444,11 @@ function createVis(data) {
         d.NA_players = +d.NA_players;
     });
 
-    var genreData = d3.nest()
-        .key(d => { return d.Genre; })
-        .rollup(function(v) { return d3.sum(v, function(d) { return d.Global_players; })})        
-        .entries(gameData);
-    console.log(genreData);
-    var genrePlatformData = d3.nest()
-        .key(d => { return d.Genre; })
-        .key(d => { return d.Platform_Group; })
-        .rollup(function(v) { return d3.sum(v, function(d) { return d.Global_players; })})        
-        .entries(gameData);
-    console.log(genrePlatformData);
-
     //Call function
     lollipop(gameData);
-    lineChart(gameData);
-    stackedBars(genrePlatformData, genreData, gameData);
+    scatterPlot(gameData);
+    stackedBars(genreData);
 }
 
-d3.csv("video_game.csv")
+Promise.all([d3.csv("video_game.csv"), d3.csv("genreTotals.csv")])
     .then(createVis);
