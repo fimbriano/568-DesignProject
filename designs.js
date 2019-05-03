@@ -113,7 +113,7 @@ function scatterPlot(gameData) {
     
     //Title
     var title = svg.append("text")
-        .attr("x", 200)
+        .attr("x", width/3)
         .attr("y", -5)
         .text("Top 25 Games - Global Players vs. NA Players");
 
@@ -216,8 +216,8 @@ function lollipop(gameData) {
     
     //Title
     var title = svg.append("text")
-        .attr("x", 270)
-        .attr("y", -5)
+        .attr("x", width/3)
+        .attr("y", -6)
         .text("Top 25 Games - Avg. Players per Platform")
 
     //X Axis
@@ -330,7 +330,7 @@ function lollipop(gameData) {
             d3.selectAll(".lollipopSVG .pacmen .pacman")
                 .attr("class", "pacman show");
             //Show points
-            d3.selectAll(".lineSVG .points .point")
+            d3.selectAll(".scatterSVG .points .point")
                 .attr("class", "point show");
         } else {    
             //Hide droplines
@@ -351,7 +351,7 @@ function lollipop(gameData) {
                 });
 
             //Hide points
-            d3.selectAll(".lineSVG .points .point")
+            d3.selectAll(".scatterSVG .points .point")
                 .attr("class", function(d){
                     if(d.Platform_Group === newPlatform){
                         return "point show";
@@ -391,6 +391,21 @@ function lollipop(gameData) {
         .style("fill", "gold")
         .style("stroke", "black")
         .attr("d", arc);
+    var gLine = legendSVG.append("line")
+        .attr("x1", 60)
+        .attr("y1", 45)
+        .attr("x2", 100)
+        .attr("y2", 45)
+        .attr("stroke", "black")
+        .attr("stroke-width", 2);
+    var text = legendSVG.append("text")
+        .attr("x", 105)
+        .attr("y", 40)
+        .text("Size of Mouth =");
+    legendSVG.append("text")
+        .attr("x", 105)
+        .attr("y", 60)
+        .text("# Global Players");
     var line = legendSVG.append("line")
         .attr("x1", 50)
         .attr("y1", 65)
