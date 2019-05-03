@@ -1,0 +1,62 @@
+#info {
+    display: flex;
+    justify-content: space-between;
+}
+
+.right {
+    font-style: italic;
+    text-align: right;
+}
+
+#class,#assignment {
+    font-weight: normal;
+}
+
+#toc {
+    background: #f9f9f9 none repeat scroll 0 0;
+    border: 1px solid #aaa;
+    display: table;
+    font-size: 95%;
+    margin-bottom: 1em;
+    padding: 20px;
+    width: auto;
+}
+
+#toc li, #toc ul, #toc ul li{
+    padding-left: 5px;
+    padding-bottom: 2px; 
+    list-style: none outside none !important;
+}
+
+.tooltip {
+    position: absolute;           
+    text-align: center;           
+    height: auto;
+    width: auto;                 
+    padding: 2px;             
+    font: 14px ariel;        
+    background: lightgrey;   
+    border: 0px;      
+    border-radius: 8px;           
+    pointer-events: none;         
+}
+
+#dropdown {
+    height: 25px;
+}
+#lollipopViz {
+    display: flex;
+    flex-direction: row;
+}
+
+img {
+    max-width: 50%;
+    height: auto;
+}
+
+.hidden {
+    opacity: 0;
+}
+.show {
+    opacity: 1;
+}
